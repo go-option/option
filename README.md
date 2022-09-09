@@ -15,15 +15,22 @@ type CreationOption func(*creationOptions)
 
 // Define the concrete option properties as a struct type
 type creationOptions struct {
-	conn *net.Conn
+    conn *net.Conn
+    limit int
 }
 
 // Define functions that generate closures that sets the
 // option properties on the struct type
 func CreateWithConn(conn *net.Conn) CreationOption {
-	return func(o *creationOptions) {
-		o.conn = conn
-	}
+    return func(o *creationOptions) {
+        o.conn = conn
+    }
+}
+
+func CreateWithLimit(limit int) CreationOption {
+    return func(o *creationOptions) {
+        o.limit = limit
+    }
 }
 
 // Now to use it in actual API functions, add it as the last
@@ -34,5 +41,12 @@ func Create(options ...CreationOption) *Client {
     // Use the returned options struct value with all user
     // provided values
     return &Client{opts.conn}
+}
+
+// And you can use defaults.
+func CreateWithDefaults(options ...CreationOption) *Client {
+    defaultLimit := CreateWithLimit(10)
+    opts := option.New(options, defaultLimit)
+    return &Client{opts.conn, opts.limit}
 }
 ```
